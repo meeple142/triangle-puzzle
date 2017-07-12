@@ -1,50 +1,36 @@
 /*eslint-env node*/
 /*eslint no-undef:2, no-unused-vars:0, no-console:0*/
-var boardTree;
+//process.stdin.resume(); //so the program will not close instantly
 
-function makeBoard(boardIn) {
-    var boardOut = {};
+function exitHandler(options, err) {
+    if (options.cleanup) console.log('clean');
+    if (err) console.log(err.stack);
 
-    if (boardIn) {
-        //copy
-        boardOut.board = boardIn.board.map(function (ele) {
-            return ele;
-        });
-    } else {
-        boardOut.board = [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-    }
-
-    boardOut.children = [];
-    return boardOut;
+    process.exit();
 }
 
+//do something when app is closing
+process.on('exit', exitHandler.bind(null, {
+    cleanup: true
+}));
 
-function makeMoves(boardIn) {
-    var moves, childrenOut;
+//catches ctrl+c event
+process.on('SIGINT', exitHandler.bind(null, {
+    exit: true
+}));
 
-    function makeMove(boardInL, jumperPegIndex, removedPegIndex, landingSpaceIndex) {
-        var jumperPeg = boardIn.board[jumperPegIndex],
-            removedPeg = boardIn.board[removedPegIndex],
-            landingSpace = boardIn.board[landingSpaceIndex],
+//catches uncaught exceptions
+process.on('uncaughtException', exitHandler.bind(null, {
+    exit: true
+}));
 
-            shouldMakeMove = removedPeg === 1 && jumperPeg === 1 && landingSpace === 0,
-            newBoard;
+function toSum(sum, item) {
+    return sum + item;
+}
 
-        //console.log(shouldMakeMove)
-        if (shouldMakeMove) {
-            //copy the board
-            newBoard = makeBoard(boardInL);
-            //then make the move
-            newBoard.board[jumperPegIndex] = 0;
-            newBoard.board[removedPegIndex] = 0;
-            newBoard.board[landingSpaceIndex] = 1;
-
-            return newBoard;
-        }
-
-        return null;
-    }
-
+var fs = require('fs'),
+    util = require('util'),
+    boardTree,
     moves = [
         //right to bottom left
         [0, 2, 5],
@@ -96,6 +82,67 @@ function makeMoves(boardIn) {
         [5, 4, 3]
     ];
 
+function makeBoard(boardIn) {
+    var boardOut = {},
+        pegCount;
+
+    if (boardIn) {
+        //copy
+        boardOut.board = boardIn.board.map(function (ele) {
+            return ele;
+        });
+        boardOut.numberOfPegs = -1;
+    } else {
+        //empty constructor
+        boardOut.board = [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+        boardOut.numberOfPegs = 14;
+    }
+
+    boardOut.solved = false
+    boardOut.children = [];
+    return boardOut;
+}
+var counter = {
+    loop: 0,
+    boards: 1
+};
+
+function makeMoves(boardIn) {
+    counter.loop += 1;
+    console.log(counter);
+    var childrenOut;
+
+    function makeMove(boardInL, jumperPegIndex, removedPegIndex, landingSpaceIndex) {
+
+
+
+        var jumperPeg = boardInL.board[jumperPegIndex],
+            removedPeg = boardInL.board[removedPegIndex],
+            landingSpace = boardInL.board[landingSpaceIndex],
+
+            shouldMakeMove = removedPeg === 1 && jumperPeg === 1 && landingSpace === 0,
+            newBoard, pegCount;
+        //console.log(shouldMakeMove)
+        if (shouldMakeMove) {
+            //copy the board
+            newBoard = makeBoard(boardInL);
+            //then make the move
+            newBoard.board[jumperPegIndex] = 0;
+            newBoard.board[removedPegIndex] = 0;
+            newBoard.board[landingSpaceIndex] = 1;
+
+            //check are we done?
+            pegCount = newBoard.board.reduce(toSum, 0);
+            newBoard.numberOfPegs = pegCount;
+            newBoard.solved = pegCount === 1;
+
+            return newBoard;
+        }
+
+        return null;
+    }
+
+
 
     childrenOut = moves.map(function (move) {
             //will make a copy ofthe board with the move done to it or null
@@ -108,11 +155,23 @@ function makeMoves(boardIn) {
         });
 
     //console.log('c', childrenOut)
-    boardIn.children = boardIn.children.concat(childrenOut)
+    boardIn.children = childrenOut
+    //    boardIn.children = boardIn.children.concat(childrenOut)
+    if (boardIn.children.length > 0 && counter.loop < 1000) {
+        counter.boards += boardIn.children.length;
+        boardIn.children.forEach(function (child) {
+            makeMoves(child);
+        });
+    }
+    //console.log(counter);
 }
 
 boardTree = makeBoard();
 makeMoves(boardTree)
-console.dir(boardTree, {
+fs.writeFileSync('boardTree.json', util.inspect(boardTree, {
     depth: null
-});
+}), 'utf8');
+
+//console.dir(boardTree, {
+//    depth: null
+//});
