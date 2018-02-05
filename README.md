@@ -2,6 +2,7 @@ current Out put
 
 
 number of boards: 1
+
 number of board states: 1
 
 -----
