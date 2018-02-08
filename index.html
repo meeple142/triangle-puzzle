@@ -4,9 +4,11 @@ and therefor is relised under the GNU General Public License, version 3 https://
 at this point I decided to ditch the Sankey and do it myself.
 -->
 <!DOCTYPE html>
-<svg width="5000" height="20000"></svg>
+<svg width="5000" height="40000"></svg>
+<script src="makePegLocations.js"></script>
 <script src="https://d3js.org/d3.v4.js"></script>
 <script>
+    var pegLocations = makePegLocations();
     var svg = d3.select("svg"),
         width = +svg.attr("width"),
         height = +svg.attr("height");
@@ -90,30 +92,42 @@ at this point I decided to ditch the Sankey and do it myself.
                 .data(d => d)
                 .enter()
                 .append("g").attr('name', d => 'state' + d.id);
+                
+            state.attr('transform', d => `translate(${d.x},${d.y})`)
             
             //draw the board
             state.append("rect")
                 .attr("x", function (d) {
-                    return d.x;
+                    return -22;
                 })
                 .attr("y", function (d) {
-                    return d.y;
+                    return -16;
                 })
                 .attr("height", function (d) {
-                    return 15;
+                    return 39;
                 })
                 .attr("width", function (d) {
-                    return 15;
+                    return 44;
                 })
                 .attr("fill", function (d) {
-                    return 'blue';
+                    return 'white';
                 })
                 .attr("stroke", "#000");
+            
+            state.selectAll('circle')
+            .data(d => d.pegs)
+            .enter()
+                .append('circle')
+                .attr('cx', (d,i)=> pegLocations[i].dx - pegLocations[0].dx)
+                .attr('cy', (d,i)=> pegLocations[i].dy - (pegLocations[14].dy / 2))
+                .attr('r', 3)
+                .attr('fill', d=> d===0 ? 'transparent': 'green')
+                .attr('stroke', 'black' )
 
             //add the title to the board
             state.append("title")
                 .text(function (d) {
-                    return d.id;
+                    return `${d.id}: ${d.pegs.join(',')}`;
                 });
         })
     });

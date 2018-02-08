@@ -3,7 +3,7 @@ function makePegLocations(){
       return 0.5 * (dX * countInRow) - 0.5
    }
    
-   var dX = 1,
+   var dX = 8,
        dY = dX * Math.sqrt(3) / 2,
        countInRow = 1,
        pegCount = 15,
@@ -18,7 +18,7 @@ function makePegLocations(){
    for(pegI = 0; pegI < pegCount; ++pegI){
       
       locations.push({
-      dx : rowStartX + rowI * dX,
+      dx : -rowStartX + rowI * dX,
       dy : dY * countInRow
       });
       
@@ -42,4 +42,3 @@ function makePegLocations(){
    return locations;
 }
 
-console.log(makePegLocations());
