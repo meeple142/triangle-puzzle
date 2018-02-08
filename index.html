@@ -28,6 +28,8 @@ at this point I decided to ditch the Sankey and do it myself.
 
     d3.json("states.json", function (error, states) {
         d3.json("links.json", function (error, links) {
+            //remove the empty 0 row
+            states = states.filter( e => e.length > 0)
 
             var yScales = states.map(list => d3.scalePoint()
                 .domain(d3.range(list.length))
