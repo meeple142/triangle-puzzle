@@ -7,15 +7,15 @@ function toSum(sum, item) {
     return sum + item;
 }
 
-function makeBoardList(){
-   var listOut = [],
-   rowCount = 15;
-   
-   for(i = 0; i < rowCount; ++i){
-      listOut.push([]);
-   }
-   
-   return listOut;
+function makeBoardList() {
+    var listOut = [],
+        rowCount = 15;
+
+    for (i = 0; i < rowCount; ++i) {
+        listOut.push([]);
+    }
+
+    return listOut;
 }
 
 var row, index,
@@ -80,10 +80,10 @@ var row, index,
 
 function makeBoard(boardIn) {
     var boardOut = {};
-        
-        //incrament the number of boards and make id
-							boardCount += 1;
-        boardOut.id = boardCount; 
+
+    //incrament the number of boards and make id
+    boardCount += 1;
+    boardOut.id = boardCount;
 
     if (boardIn) {
         //copy
@@ -93,23 +93,26 @@ function makeBoard(boardIn) {
     } else {
         //empty constructor
         boardOut.pegs = [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+        boardOut.pegCount = boardOut.pegs.reduce((sum, num) => sum + num, 0);
     }
+
 
     return boardOut;
 }
 
 
-function makeLink(parentId, childId){
-   links.push({
-      parent: parentId,
-      child: childId
-   })
+function makeLink(parentId, childId, pegCount) {
+    links.push({
+        source: parentId,
+        target: childId,
+        pegCount: pegCount
+    })
 }
 
 function getChildBoards(boardIn) {
     var childrenOut;
 
-			//will return a copy ofthe board with the move done to it or null
+    //will return a copy ofthe board with the move done to it or null
     function makeMove(boardInL, jumperPegIndex, removedPegIndex, landingSpaceIndex) {
         var jumperPeg = boardInL.pegs[jumperPegIndex],
             removedPeg = boardInL.pegs[removedPegIndex],
@@ -134,24 +137,24 @@ function getChildBoards(boardIn) {
 
 
 
-     return moves.reduce(function (children, move) {
-            //will make a copy ofthe board with the move done to it or null
-            var child = makeMove(boardIn, move[0], move[1], move[2]);
-            
-            if(child !== null){
-               children.push(child);
-            }
-            
-            return children; 
-            
-        }, []);
+    return moves.reduce(function (children, move) {
+        //will make a copy ofthe board with the move done to it or null
+        var child = makeMove(boardIn, move[0], move[1], move[2]);
+
+        if (child !== null) {
+            children.push(child);
+        }
+
+        return children;
+
+    }, []);
 
 }
 
 // make sure every peg matches
-function boardsMatch(a,b){
+function boardsMatch(a, b) {
 
-   return a.pegs.every((peg, i)=> peg === b.pegs[i]);
+    return a.pegs.every((peg, i) => peg === b.pegs[i]);
 
 }
 
@@ -163,33 +166,38 @@ var childBoards, childId;
 
 // loop the rows in boardList, the row value means the number of pegs thoes boards have
 // this is to speed up checking if a board state already exsitis
-for(row = 14; row > 0; --row){
+for (row = 14; row > 0; --row) {
     console.log('number of boards:', boardCount);
     console.log('number of board states:', boardStateCount);
     console.log();
-    for(index = 0; index < boardList[row].length ; ++index){
-        
+    for (index = 0; index < boardList[row].length; ++index) {
+
         //get the Childboards
         childBoards = getChildBoards(boardList[row][index]);
-        childBoards.forEach((childBoard)=>{
-        
-        	    //find the match if it has one
-            var dupBoard = boardList[row - 1].find(boardListBoard=>{
-            			return boardsMatch(childBoard, boardListBoard)
+        childBoards.forEach((childBoard) => {
+
+            //find the match if it has one
+            var dupBoard = boardList[row - 1].find(boardListBoard => {
+                return boardsMatch(childBoard, boardListBoard)
             })
-        	
-        				// no dup
-        				if(typeof dupBoard === "undefined"){
-        					   childId = childBoard.id;
-        					   //add to boardList
-        					   boardList[row - 1].push(childBoard) 
-        					   boardStateCount += 1;
-        				} else {
-        					   childId = dupBoard.id;
-        				}
-        				
-           //make link with correct ids
-           	makeLink(boardList[row][index].id, childId);	
+
+            // no dup
+            if (typeof dupBoard === "undefined") {
+                childId = childBoard.id;
+
+                //record the number of pegs it has
+                childBoard.pegCount = row - 1;
+
+                //add to boardList
+                boardList[row - 1].push(childBoard)
+                boardStateCount += 1;
+            } else {
+                childId = dupBoard.id;
+            }
+
+            //make link with correct ids
+            //row -1 is the pegCount for the target, the lesser of the two
+            makeLink(boardList[row][index].id, childId, row - 1);
         })
     }
 }
@@ -200,4 +208,7 @@ console.log("Number of links:", links.length)
 
 fs.writeFileSync('states.json', JSON.stringify(boardList, null, 4), 'utf8');
 fs.writeFileSync('links.json', JSON.stringify(links, null, 4), 'utf8');
-
+fs.writeFileSync('graph.json', JSON.stringify({
+    nodes: boardList,
+    links: links
+}, null, 4), 'utf8');
