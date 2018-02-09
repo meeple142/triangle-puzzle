@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+    .links line {
+        stroke: #999;
+        stroke-opacity: 0.6;
+    }
+    
+    .nodes circle {
+        stroke: #fff;
+        stroke-width: 1.5px;
+    }
+</style>
+<svg width="1800" height="1600"></svg>
+<script src="https://d3js.org/d3.v4.js"></script>
+<script>
+    function getBoardsByPegCount(graph, pegCount) {
+        return graph.nodes.reduce(function (boardsOut, boardList, i) {
+            if (i >= pegCount) {
+                boardsOut = boardsOut.concat(boardList);
+            }
+            return boardsOut;
+        }, []);
+    }
+
+    function getLinksByPegCount(graph, pegCount) {
+        return graph.links.filter((link) => link.pegCount >= pegCount);
+    }
+
+    function getGraphByPegCount(graph, pegCount) {
+        return {
+            nodes: getBoardsByPegCount(graph, pegCount),
+            links: getLinksByPegCount(graph, pegCount)
+        }
+    }
+
+    var svg = d3.select("svg"),
+        width = +svg.attr("width"),
+        height = +svg.attr("height");
+
+    var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+    var simulation = d3.forceSimulation()
+        .force("link", d3.forceLink().id(function (d) {
+            return d.id;
+        }))
+        .force("r", d3.forceRadial(function (d) {
+            return (-d.pegCount + 14) * 100;
+        }, width / 2, height / 2).strength(2))
+
+    //    .force("charge", d3.forceManyBody())
+    .force("charge", d3.forceCollide().radius(10))
+
+    .force("center", d3.forceCenter(width / 2, height / 2));
+
+    d3.json("graph.json", function (error, graph) {
+
+        if (error) throw error;
+
+
+        var nodes = svg.append("g")
+            .attr("class", "nodes");
+        var links = svg.append("g")
+            .attr("class", "links")
+
+        function update(graph) {
+            var link = links
+                .selectAll("line")
+                .data(graph.links)
+                .enter().append("line");
+            //                .attr("stroke-width", function (d) {
+            //                    return Math.sqrt(d.value);
+            //                });
+
+            var node = nodes
+                .selectAll("circle")
+                .data(graph.nodes, d => d.id)
+                .enter().append("circle")
+                .attr("r", 5)
+                .attr("fill", function (d) {
+                    return color(d.pegCount);
+                }).call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+
+
+
+
+            node.append("title")
+                .text(function (d) {
+                    return d.id + ": " + d.pegCount;
+                });
+
+            simulation
+                .nodes(graph.nodes)
+                .on("tick", ticked);
+
+            simulation.force("link")
+                .links(graph.links);
+
+
+            function ticked() {
+                link
+                    .attr("x1", function (d) {
+                        return d.source.x;
+                    })
+                    .attr("y1", function (d) {
+                        return d.source.y;
+                    })
+                    .attr("x2", function (d) {
+                        return d.target.x;
+                    })
+                    .attr("y2", function (d) {
+                        return d.target.y;
+                    });
+
+                node
+                    .attr("cx", function (d) {
+                        return d.x;
+                    })
+                    .attr("cy", function (d) {
+                        return d.y;
+                    });
+            }
+        }
+
+        //        update(getGraphByPegCount(graph, 14));
+
+        var count = 0;
+        for (count = 0; count < 3; ++count) {
+            (function (count) {
+                setTimeout(function () {
+                    console.log(count)
+                    update(getGraphByPegCount(graph, -count + 14));
+                }, count * 3000)
+            })(count);
+        }
+
+
+    });
+
+    function dragstarted(d) {
+        if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
+    }
+
+    function dragged(d) {
+        d.fx = d3.event.x;
+        d.fy = d3.event.y;
+    }
+
+    function dragended(d) {
+        if (!d3.event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
+    }
+</script>
