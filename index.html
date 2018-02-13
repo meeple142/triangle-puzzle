@@ -29,7 +29,7 @@ at this point I decided to ditch the Sankey and do it myself.
     d3.json("states.json", function (error, states) {
         d3.json("links.json", function (error, links) {
             //remove the empty 0 row
-            states = states.filter( e => e.length > 0)
+            states = states.filter(e => e.length > 0)
 
             var yScales = states.map(list => d3.scalePoint()
                 .domain(d3.range(list.length))
@@ -38,7 +38,7 @@ at this point I decided to ditch the Sankey and do it myself.
             );
 
             //fliped the x scale so that it reads left to right
-            var xScale = d3.scaleBand().domain(d3.range(states.length)).range([ width, 0])
+            var xScale = d3.scaleBand().domain(d3.range(states.length)).range([width, 0])
             var hash = {};
             //add in the y values for each state
             states.forEach((list, listI) => {
@@ -48,17 +48,28 @@ at this point I decided to ditch the Sankey and do it myself.
                     state.x = xScale(listI) + xScale.bandwidth() / 2;
                     //flaten state references to a hash table
                     hash[state.id] = state;
+
+                    //add the children and parents arrays
+                    state.children = [];
+                    state.parents = [];
                 })
             })
 
             // change all the links to have references to the states
+            //and record the parents and kids
             links.forEach(link => {
                 link.source = hash[link.source]
                 link.target = hash[link.target]
+
+                //add the child
+                link.source.children.push(link.target.id)
+
+                //add the parent
+                link.target.parents.push(link.source.id);
             });
 
             // console.log('Links:', links)
-            // console.log('states', states)
+            console.log('states', states)
             if (error) throw error;
 
             //draw the links
@@ -75,7 +86,7 @@ at this point I decided to ditch the Sankey and do it myself.
                 .attr("stroke-width", function (d) {
                     return 3;
                 });
-            
+
             //add the title to the links
             link.append("title")
                 .text(function (d) {
@@ -88,15 +99,15 @@ at this point I decided to ditch the Sankey and do it myself.
                 .each()
                 .enter().append("g")
                 .attr('name', (d, i) => 'step' + i)
-            
+
             // make the groups for the states
             var state = col.selectAll('g')
                 .data(d => d)
                 .enter()
                 .append("g").attr('name', d => 'state' + d.id);
-                
+
             state.attr('transform', d => `translate(${d.x},${d.y})`)
-            
+
             //draw the board
             state.append("rect")
                 .attr("x", function (d) {
@@ -115,16 +126,16 @@ at this point I decided to ditch the Sankey and do it myself.
                     return 'white';
                 })
                 .attr("stroke", "#000");
-            
+
             state.selectAll('circle')
-            .data(d => d.pegs)
-            .enter()
+                .data(d => d.pegs)
+                .enter()
                 .append('circle')
-                .attr('cx', (d,i)=> pegLocations[i].dx - pegLocations[0].dx)
-                .attr('cy', (d,i)=> pegLocations[i].dy - (pegLocations[14].dy / 2))
+                .attr('cx', (d, i) => pegLocations[i].dx - pegLocations[0].dx)
+                .attr('cy', (d, i) => pegLocations[i].dy - (pegLocations[14].dy / 2))
                 .attr('r', 3)
-                .attr('fill', d=> d===0 ? 'transparent': 'green')
-                .attr('stroke', 'black' )
+                .attr('fill', d => d === 0 ? 'transparent' : 'green')
+                .attr('stroke', 'black')
 
             //add the title to the board
             state.append("title")
