@@ -5,7 +5,9 @@ module.exports = class BoardList {
         this.boardCount = -1;
         this.boardGroupsLists = new Array(15).fill(true).map(e => []);
     }
-
+    get list(){
+        return this.boardGroupsLists;
+    }
     getBoardsByPegCount(pegCount){
         //get the sub list
         var boardGroupList = this.boardGroupsLists[pegCount];
