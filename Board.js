@@ -133,7 +133,7 @@ module.exports = class Board {
             var child = makeMove(that, move[0], move[1], move[2]);
 
             if (child !== null) {
-                children.push(child);
+                children.push({move: move,board:child});
             }
 
             return children;

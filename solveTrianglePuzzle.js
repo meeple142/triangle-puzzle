@@ -27,18 +27,18 @@ for (let i = 14; i > 1; --i) {
         //for each child board
         childBoards.forEach(function (childBoard) {
             //check if on list
-            let boardId = boardList.isOnList(childBoard);
+            let boardId = boardList.isOnList(childBoard.board);
 
             //if not on list
             if (boardId === null) {
                 //add to list
-                boardList.addBoard(childBoard);
+                boardList.addBoard(childBoard.board);
                 //save id
-                boardId = childBoard.id;
+                boardId = childBoard.board.id;
             }
 
             //make link between each parent board and child board id
-            links.push(new Link(parentBoard.id, boardId, childBoard.pegCount));
+            links.push(new Link(parentBoard.id, boardId, childBoard.move, childBoard.board.pegCount));
         })
     })
 }
