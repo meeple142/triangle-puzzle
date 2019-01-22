@@ -6,7 +6,19 @@ module.exports = class BoardList {
         this.boardGroupsLists = new Array(15).fill(true).map(e => []);
     }
     get list() {
-        return this.boardGroupsLists;
+        return this.boardGroupsLists.reduce((arrayOut, list) =>
+            arrayOut.concat(list.map(group => group.boards[0])));
+    }
+    get listByPegCount() {
+        return this.boardGroupsLists.map(list =>
+            list.map(group =>
+                group.boards[0]
+            )
+        );
+
+    }
+    get debugList() {
+        return this.boardGroupsLists
     }
 
     getTotalBoardCount() {
@@ -26,7 +38,7 @@ module.exports = class BoardList {
         var boardGroup = {
             id: boardIn.id,
             boards: [
-                boardIn.clone(), //i
+                boardIn, //i
                 boardIn.clone().rotate(), //r
                 boardIn.clone().rotate().rotate(), //r2
                 boardIn.clone().flip(), //f

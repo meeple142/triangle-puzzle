@@ -37,7 +37,7 @@ at this point I decided to ditch the Sankey and do it myself.
             .attr("font-size", 10)
             .selectAll("g");
 
-        d3.json("states.json", function (error, states) {
+        d3.json("boards.json", function (error, states) {
             d3.json("links.json", function (error, links) {
                 //remove the empty 0 row
                 states = states.filter(e => e.length > 0)

@@ -1,3 +1,4 @@
+var boardCount = 0;
 module.exports = class Board {
     constructor(boardIn) {
         if (boardIn) {
@@ -10,7 +11,8 @@ module.exports = class Board {
             this.pegCount = 14;
         }
         //unique Id
-        this.id = Date.now();
+        this.id = boardCount;
+        boardCount += 1;
     }
 
     clone() {

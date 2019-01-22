@@ -47,14 +47,15 @@ for (let i = 14; i > 1; --i) {
 
 const time = Date.now();
 const graph = {
-    nodes: boardList.list,
+    nodes: boardList.listByPegCount,
     links: links
 }
 
-console.log("Number of solution states:", boardList.list[1].length);
+console.log("Number of solution states:", boardList.getBoardsByPegCount(1).length);
 console.log("Total Number of boards:", boardList.getTotalBoardCount());
 console.log("Number of links:", links.length);
 
+// report('full', time, boardList.debugList);
 report('boards', time, graph.nodes);
 report('links', time, graph.links);
 report('graph', time, graph);
