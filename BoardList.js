@@ -5,13 +5,17 @@ module.exports = class BoardList {
         this.boardCount = -1;
         this.boardGroupsLists = new Array(15).fill(true).map(e => []);
     }
-    get list(){
+    get list() {
         return this.boardGroupsLists;
     }
-    getBoardsByPegCount(pegCount){
+
+    getTotalBoardCount() {
+        return this.boardGroupsLists.reduce((sum, list) => sum + list.length, 0)
+    }
+    getBoardsByPegCount(pegCount) {
         //get the sub list
         var boardGroupList = this.boardGroupsLists[pegCount];
-        return boardGroupList.map(boardGroup.boards[0]);
+        return boardGroupList.map(boardGroup => boardGroup.boards[0]);
     }
 
     addBoard(boardIn) {
@@ -39,14 +43,14 @@ module.exports = class BoardList {
         //get the sub list
         var boardGroupList = this.boardGroupsLists[boardIn.pegCount];
 
-        //see is any boardGroup has a board that matches
+        //see if any boardGroup has a board that matches
         var boardGroupMatch = boardGroupList.find(boardGroup =>
             boardGroup.boards.some(board =>
                 board.hasSamePegs(boardIn)
             )
         );
 
-        return boardGroupMatch === undefined ? null: boardGroupMatch.id;
+        return boardGroupMatch === undefined ? null : boardGroupMatch.id;
     }
-    
+
 }

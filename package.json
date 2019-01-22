@@ -1,0 +1,23 @@
+{
+  "name": "triangle-puzzle",
+  "version": "1.0.0",
+  "description": "shows all the possible board states for the peg jumping triangle game",
+  "main": "solveTrianglePuzzle.js",
+  "dependencies": {
+    "json-stringify-pretty-compact": "^1.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meeple142/triangle-puzzle.git"
+  },
+  "author": "Joshua McKinney",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/meeple142/triangle-puzzle/issues"
+  },
+  "homepage": "https://github.com/meeple142/triangle-puzzle#readme"
+}

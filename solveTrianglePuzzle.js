@@ -1,6 +1,7 @@
 const Board = require('./Board');
 const Link = require('./Link');
 const BoardList = require('./BoardList');
+const report = require('./report');
 
 //make the first board
 var firstBoard = new Board();
@@ -17,6 +18,7 @@ boardList.addBoard(firstBoard);
 for (let i = 14; i > 1; --i) {
     //get the boards with i pegs (parent boards)
     let parentsBoards = boardList.getBoardsByPegCount(i);
+    console.log(`Starting boards with ${i} pegs. Board count:${parentsBoards.length}`)
     //for each parent board
     parentsBoards.forEach(function (parentBoard) {
         //find the children boards
@@ -49,11 +51,8 @@ const graph = {
     links: links
 }
 
-function report(fileName, time, obj) {
-    fs.writeFileSync(`${fileName}_${time}.json`, JSON.stringify(obj, null, 4), 'utf8');;
-}
-
 console.log("Number of solution states:", boardList.list[1].length);
+console.log("Total Number of boards:", boardList.getTotalBoardCount());
 console.log("Number of links:", links.length);
 
 report('boards', time, graph.nodes);

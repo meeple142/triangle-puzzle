@@ -18,7 +18,7 @@ module.exports = class Board {
     }
 
     doTransformation(moves) {
-        pegsOut = [];
+        let pegsOut = [];
         // for each move, do it
         moves.forEach((destination, start) => pegsOut[destination] = this.pegs[start]);
         //over wright
@@ -115,6 +115,9 @@ module.exports = class Board {
                 newBoard.pegs[removedPegIndex] = 0;
                 newBoard.pegs[landingSpaceIndex] = 1;
 
+                //update the peg count here
+                newBoard.pegCount -= 1;
+
                 return newBoard;
             }
 
@@ -122,10 +125,10 @@ module.exports = class Board {
         }
 
 
-
-        return moves.reduce(function (children, move) {
+        var that = this;
+        return pegMoves.reduce(function (children, move) {
             //will make a copy of the board with the move done to it or null
-            var child = makeMove(this, move[0], move[1], move[2]);
+            var child = makeMove(that, move[0], move[1], move[2]);
 
             if (child !== null) {
                 children.push(child);
